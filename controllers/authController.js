@@ -118,12 +118,21 @@ class AuthController {
       ctx.session.authenticated = true;
       ctx.session.sessionId = session.id;
 
-      // Redirect to embedded app with proper host parameter
-      const hostParam = ctx.query.host || Buffer.from(`${session.shop}/admin`).toString('base64');
-      const redirectUrl = `${HOST}/app?shop=${session.shop}&host=${hostParam}&embedded=1`;
+      // For embedded apps, redirect to Shopify admin with app URL
+      const host = ctx.query.host;
+      const embedded = ctx.query.embedded !== '0';
       
-      console.log(`Redirecting to embedded app: ${redirectUrl}`);
-      ctx.redirect(redirectUrl);
+      if (embedded && host) {
+        // Redirect to Shopify admin with embedded app
+        const adminUrl = `https://${session.shop}/admin/apps/${process.env.SHOPIFY_API_KEY}`;
+        console.log(`Redirecting to Shopify admin: ${adminUrl}`);
+        ctx.redirect(adminUrl);
+      } else {
+        // Fallback to our app page
+        const redirectUrl = `${HOST}/app?shop=${session.shop}&embedded=1`;
+        console.log(`Redirecting to app: ${redirectUrl}`);
+        ctx.redirect(redirectUrl);
+      }
     } catch (error) {
       console.error('Shopify auth callback error:', error);
       ctx.status = 500;

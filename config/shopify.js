@@ -18,7 +18,7 @@ if (!SHOPIFY_API_KEY || !SHOPIFY_API_SECRET_KEY) {
 const shopify = shopifyApi({
   apiKey: SHOPIFY_API_KEY,
   apiSecretKey: SHOPIFY_API_SECRET_KEY,
-  scopes: ['read_products', 'write_products', 'read_orders', 'write_orders', 'read_customers', 'read_customer_events'],
+  scopes: ['read_products', 'write_products', 'read_orders', 'write_orders', 'read_customers', 'read_customer_events', 'write_script_tags', 'read_script_tags'],
   hostName: HOST.replace(/https?:\/\//, ''),
   hostScheme: 'https',
   apiVersion: LATEST_API_VERSION,

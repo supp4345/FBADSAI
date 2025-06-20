@@ -180,6 +180,8 @@ router.get('/', async (ctx) => {
   const shop = ctx.query.shop;
   const host = ctx.query.host;
   const embedded = ctx.query.embedded;
+  const hmac = ctx.query.hmac;
+  const timestamp = ctx.query.timestamp;
   
   // If shop parameter is present, this is a Shopify installation request
   if (shop) {
@@ -188,23 +190,53 @@ router.get('/', async (ctx) => {
     // Validate shop domain
     const cleanShop = shop.toLowerCase().trim();
     if (!cleanShop.includes('.myshopify.com') || !/^[a-zA-Z0-9\-]+\.myshopify\.com$/.test(cleanShop)) {
-      await ctx.render('install', { 
-        title: 'Install AI Facebook Ads Pro',
-        error: 'Invalid shop domain. Please enter a valid Shopify store URL.',
-        shop: shop
-      });
+      console.error(`Invalid shop domain: ${shop}`);
+      ctx.status = 400;
+      ctx.body = { error: 'Invalid shop domain' };
       return;
     }
     
-    // Redirect to Shopify OAuth
-    ctx.redirect(`/auth/shopify?shop=${encodeURIComponent(cleanShop)}&host=${encodeURIComponent(host || '')}&embedded=${embedded || '1'}`);
+    // Verify HMAC if present (for security)
+    if (hmac && timestamp) {
+      try {
+        const crypto = require('crypto');
+        const queryString = Object.keys(ctx.query)
+          .filter(key => key !== 'hmac' && key !== 'signature')
+          .sort()
+          .map(key => `${key}=${ctx.query[key]}`)
+          .join('&');
+        
+        const calculatedHmac = crypto
+          .createHmac('sha256', process.env.SHOPIFY_API_SECRET_KEY)
+          .update(queryString)
+          .digest('hex');
+        
+        if (calculatedHmac !== hmac) {
+          console.error('HMAC verification failed');
+          ctx.status = 401;
+          ctx.body = { error: 'Unauthorized' };
+          return;
+        }
+      } catch (error) {
+        console.error('HMAC verification error:', error);
+      }
+    }
+    
+    // Redirect directly to Shopify OAuth
+    let authUrl = `/auth/shopify?shop=${encodeURIComponent(cleanShop)}`;
+    if (host) authUrl += `&host=${encodeURIComponent(host)}`;
+    if (embedded) authUrl += `&embedded=${embedded}`;
+    
+    console.log(`Redirecting to OAuth: ${authUrl}`);
+    ctx.redirect(authUrl);
     return;
   }
   
-  // No shop parameter - show installation page
+  // No shop parameter - show installation page for manual installation
   await ctx.render('install', { 
     title: 'Install AI Facebook Ads Pro',
-    shop: ''
+    shop: '',
+    appUrl: process.env.HOST || 'https://fbadsai-git-main-sellerais-projects.vercel.app'
   });
 });
 
