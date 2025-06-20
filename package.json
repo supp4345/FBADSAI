@@ -7,8 +7,17 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
     "deploy": "vercel --prod",
-    "build": "node build.js"
+    "deploy:staging": "vercel",
+    "build": "node build.js",
+    "setup": "npm install && npm run build",
+    "health-check": "node scripts/health-check.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js"
   },
   "keywords": [
     "shopify",
@@ -51,6 +60,11 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
     "jest": "^29.7.0",
     "nodemon": "^3.0.2",
     "supertest": "^6.3.3"
@@ -60,10 +74,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yashraj0077/FacebookAI-Ads-Shopify.git"
+    "url": "git+https://github.com/supp4345/FBADSAI.git"
   },
   "bugs": {
-    "url": "https://github.com/yashraj0077/FacebookAI-Ads-Shopify/issues"
+    "url": "https://github.com/supp4345/FBADSAI/issues"
   },
-  "homepage": "https://github.com/yashraj0077/FacebookAI-Ads-Shopify#readme"
+  "homepage": "https://github.com/supp4345/FBADSAI#readme"
 }
