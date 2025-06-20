@@ -1,0 +1,134 @@
+{% comment %}
+  Facebook Pixel and Conversion Tracking
+  This theme app extension adds Facebook Pixel tracking to the storefront
+{% endcomment %}
+
+{% if block.settings.pixel_id != blank %}
+  <!-- Facebook Pixel Code -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+
+    fbq('init', '{{ block.settings.pixel_id }}');
+    
+    {% if block.settings.enable_advanced_matching %}
+      {% if customer %}
+        fbq('init', '{{ block.settings.pixel_id }}', {
+          em: '{{ customer.email | sha256 }}',
+          fn: '{{ customer.first_name | downcase | sha256 }}',
+          ln: '{{ customer.last_name | downcase | sha256 }}',
+          ph: '{{ customer.phone | remove: "-" | remove: " " | remove: "(" | remove: ")" | sha256 }}'
+        });
+      {% endif %}
+    {% endif %}
+    
+    {% if block.settings.enable_automatic_events %}
+      fbq('track', 'PageView');
+      
+      {% comment %} Track specific page types {% endcomment %}
+      {% case template %}
+        {% when 'product' %}
+          fbq('track', 'ViewContent', {
+            content_ids: ['{{ product.id }}'],
+            content_type: 'product',
+            content_name: '{{ product.title | escape }}',
+            content_category: '{{ product.type | escape }}',
+            value: {{ product.price | money_without_currency }},
+            currency: '{{ cart.currency.iso_code }}'
+          });
+        {% when 'collection' %}
+          fbq('track', 'ViewCategory', {
+            content_category: '{{ collection.title | escape }}'
+          });
+        {% when 'search' %}
+          fbq('track', 'Search', {
+            search_string: '{{ search.terms | escape }}'
+          });
+      {% endcase %}
+    {% endif %}
+  </script>
+  
+  <!-- Facebook Pixel Noscript -->
+  <noscript>
+    <img height="1" width="1" style="display:none"
+         src="https://www.facebook.com/tr?id={{ block.settings.pixel_id }}&ev=PageView&noscript=1"/>
+  </noscript>
+  
+  {% comment %} Add to Cart Tracking {% endcomment %}
+  {% if block.settings.enable_automatic_events %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Track Add to Cart events
+        const addToCartForms = document.querySelectorAll('form[action*="/cart/add"]');
+        addToCartForms.forEach(function(form) {
+          form.addEventListener('submit', function(e) {
+            const formData = new FormData(form);
+            const variantId = formData.get('id');
+            const quantity = formData.get('quantity') || 1;
+            
+            // Get product data from the page
+            const productData = window.ShopifyAnalytics?.meta?.product;
+            if (productData) {
+              fbq('track', 'AddToCart', {
+                content_ids: [productData.id],
+                content_type: 'product',
+                content_name: productData.title,
+                content_category: productData.type,
+                value: productData.price / 100,
+                currency: '{{ cart.currency.iso_code }}',
+                num_items: quantity
+              });
+            }
+          });
+        });
+        
+        // Track Initiate Checkout events
+        const checkoutButtons = document.querySelectorAll('a[href*="/checkout"], button[name="add"][value*="checkout"]');
+        checkoutButtons.forEach(function(button) {
+          button.addEventListener('click', function() {
+            fbq('track', 'InitiateCheckout', {
+              value: {{ cart.total_price | money_without_currency }},
+              currency: '{{ cart.currency.iso_code }}',
+              num_items: {{ cart.item_count }}
+            });
+          });
+        });
+      });
+    </script>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Facebook Pixel",
+  "target": "head",
+  "settings": [
+    {
+      "type": "text",
+      "id": "pixel_id",
+      "label": "Facebook Pixel ID",
+      "info": "Enter your Facebook Pixel ID for conversion tracking"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_advanced_matching",
+      "label": "Enable Advanced Matching",
+      "default": true,
+      "info": "Improve conversion tracking accuracy with customer data"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_automatic_events",
+      "label": "Enable Automatic Events",
+      "default": true,
+      "info": "Automatically track page views, add to cart, and purchase events"
+    }
+  ]
+}
+{% endschema %}

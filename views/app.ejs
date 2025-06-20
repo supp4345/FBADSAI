@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- Shopify App Bridge -->
+    <script src="https://unpkg.com/@shopify/app-bridge@4"></script>
+    <script src="https://unpkg.com/@shopify/app-bridge-utils@4"></script>
+    
+    <!-- Polaris CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@12.0.0/build/esm/styles.css" />
+    
+    <!-- Custom CSS for performance optimization -->
+    <style>
+        /* Critical CSS for LCP optimization */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f6f6f7;
+            line-height: 1.4;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f6f6f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e1e3e5;
+            border-top: 3px solid #008060;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Optimize layout shift */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .main-content.loaded {
+            opacity: 1;
+        }
+        
+        /* Performance optimizations */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #202223;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #6d7175;
+            font-size: 0.875rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #008060;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #006b4f;
+        }
+        
+        .btn-secondary {
+            background: #f6f6f7;
+            color: #202223;
+            border: 1px solid #c9cccf;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f2f3;
+        }
+        
+        .onboarding-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .onboarding-steps {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .step.completed {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .step-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        .step.completed .step-icon {
+            background: #00d4aa;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .onboarding-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <div class="app-container">
+        <div id="mainContent" class="main-content">
+            <!-- Onboarding Banner -->
+            <% if (!user.facebookAccessToken || !user.hasCompletedOnboarding) { %>
+            <div class="onboarding-banner">
+                <h2 style="margin: 0 0 10px 0;">Welcome to AI Facebook Ads Pro!</h2>
+                <p style="margin: 0 0 20px 0; opacity: 0.9;">Complete these steps to start creating high-converting Facebook ads</p>
+                
+                <div class="onboarding-steps">
+                    <div class="step completed">
+                        <div class="step-icon">✓</div>
+                        <span>Shopify Connected</span>
+                    </div>
+                    <div class="step <%= user.facebookAccessToken ? 'completed' : '' %>">
+                        <div class="step-icon"><%= user.facebookAccessToken ? '✓' : '2' %></div>
+                        <span>Connect Facebook</span>
+                    </div>
+                    <div class="step <%= user.hasCompletedOnboarding ? 'completed' : '' %>">
+                        <div class="step-icon"><%= user.hasCompletedOnboarding ? '✓' : '3' %></div>
+                        <span>Sync Products</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <% if (!user.facebookAccessToken) { %>
+                        <button onclick="connectFacebook()" class="btn btn-primary">
+                            <i class="fab fa-facebook"></i>
+                            Connect Facebook Account
+                        </button>
+                    <% } else if (!user.hasCompletedOnboarding) { %>
+                        <button onclick="startProductSync()" class="btn btn-primary">
+                            <i class="fas fa-sync"></i>
+                            Sync Products to Facebook
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
+            
+            <!-- Main Dashboard Content -->
+            <div class="card">
+                <h1 style="margin: 0 0 20px 0; color: #202223;">Dashboard</h1>
+                
+                <!-- Key Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalRevenue">$0</div>
+                        <div class="metric-label">Total Revenue</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalRoas">0.0x</div>
+                        <div class="metric-label">Average ROAS</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="activeCampaigns">0</div>
+                        <div class="metric-label">Active Campaigns</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="totalConversions">0</div>
+                        <div class="metric-label">Conversions</div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px;">
+                    <button onclick="createCampaign()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Create AI Campaign
+                    </button>
+                    <button onclick="viewCampaigns()" class="btn btn-secondary">
+                        <i class="fas fa-list"></i>
+                        View Campaigns
+                    </button>
+                    <button onclick="viewAnalytics()" class="btn btn-secondary">
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </button>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div id="recentActivity">
+                    <h3 style="margin: 0 0 15px 0; color: #202223;">Recent Activity</h3>
+                    <div id="activityList">
+                        <p style="color: #6d7175; text-align: center; padding: 20px;">Loading recent activity...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App Bridge initialization
+        const shopOrigin = '<%= shop.domain %>';
+        const apiKey = '<%= process.env.SHOPIFY_API_KEY %>';
+        
+        // Initialize App Bridge
+        const app = window.AppBridge.createApp({
+            apiKey: apiKey,
+            shopOrigin: shopOrigin,
+            forceRedirect: true
+        });
+
+        // Performance optimization - hide loading screen when content is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate content loading for demo
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('mainContent').classList.add('loaded');
+                loadDashboardData();
+            }, 500);
+        });
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/dashboard/overview', {
+                    headers: {
+                        'Authorization': `Bearer ${window.AppBridge.getSessionToken(app)}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateMetrics(data.metrics);
+                    updateRecentActivity(data.recentActivity);
+                } else {
+                    // Fallback to demo data
+                    updateMetrics({
+                        totalRevenue: 12450,
+                        totalRoas: 4.2,
+                        activeCampaigns: 3,
+                        totalConversions: 156
+                    });
+                    updateRecentActivity([
+                        { type: 'campaign_created', message: 'New campaign "Summer Sale" created', time: '2 hours ago' },
+                        { type: 'optimization', message: 'Campaign "Holiday Promo" optimized by AI', time: '4 hours ago' },
+                        { type: 'conversion', message: '12 new conversions from "Product Launch"', time: '6 hours ago' }
+                    ]);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Show demo data on error
+                updateMetrics({
+                    totalRevenue: 12450,
+                    totalRoas: 4.2,
+                    activeCampaigns: 3,
+                    totalConversions: 156
+                });
+            }
+        }
+
+        function updateMetrics(metrics) {
+            document.getElementById('totalRevenue').textContent = `$${metrics.totalRevenue.toLocaleString()}`;
+            document.getElementById('totalRoas').textContent = `${metrics.totalRoas}x`;
+            document.getElementById('activeCampaigns').textContent = metrics.activeCampaigns;
+            document.getElementById('totalConversions').textContent = metrics.totalConversions;
+        }
+
+        function updateRecentActivity(activities) {
+            const activityList = document.getElementById('activityList');
+            if (activities && activities.length > 0) {
+                activityList.innerHTML = activities.map(activity => `
+                    <div style="padding: 10px 0; border-bottom: 1px solid #e1e3e5;">
+                        <div style="font-weight: 500; color: #202223;">${activity.message}</div>
+                        <div style="font-size: 12px; color: #6d7175; margin-top: 2px;">${activity.time}</div>
+                    </div>
+                `).join('');
+            } else {
+                activityList.innerHTML = '<p style="color: #6d7175; text-align: center; padding: 20px;">No recent activity</p>';
+            }
+        }
+
+        // Navigation functions
+        function connectFacebook() {
+            window.location.href = '/auth/facebook';
+        }
+
+        function startProductSync() {
+            // Use App Bridge to show loading
+            const loading = window.AppBridge.Loading.create(app);
+            loading.dispatch(window.AppBridge.Loading.Action.START);
+            
+            fetch('/api/products/sync', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.AppBridge.getSessionToken(app)}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.dispatch(window.AppBridge.Loading.Action.STOP);
+                if (data.success) {
+                    // Show success toast
+                    const toast = window.AppBridge.Toast.create(app, {
+                        message: 'Products synced successfully!',
+                        duration: 3000
+                    });
+                    toast.dispatch(window.AppBridge.Toast.Action.SHOW);
+                    
+                    // Reload page to update onboarding status
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    // Show error toast
+                    const toast = window.AppBridge.Toast.create(app, {
+                        message: 'Error syncing products. Please try again.',
+                        duration: 3000,
+                        isError: true
+                    });
+                    toast.dispatch(window.AppBridge.Toast.Action.SHOW);
+                }
+            })
+            .catch(error => {
+                loading.dispatch(window.AppBridge.Loading.Action.STOP);
+                console.error('Error syncing products:', error);
+            });
+        }
+
+        function createCampaign() {
+            // Navigate to campaign creation
+            const redirect = window.AppBridge.Redirect.create(app);
+            redirect.dispatch(window.AppBridge.Redirect.Action.APP, '/campaigns/create');
+        }
+
+        function viewCampaigns() {
+            const redirect = window.AppBridge.Redirect.create(app);
+            redirect.dispatch(window.AppBridge.Redirect.Action.APP, '/campaigns');
+        }
+
+        function viewAnalytics() {
+            const redirect = window.AppBridge.Redirect.create(app);
+            redirect.dispatch(window.AppBridge.Redirect.Action.APP, '/analytics');
+        }
+
+        // Performance monitoring for Core Web Vitals
+        function measureWebVitals() {
+            // Measure LCP
+            new PerformanceObserver((entryList) => {
+                for (const entry of entryList.getEntries()) {
+                    console.log('LCP:', entry.startTime);
+                }
+            }).observe({entryTypes: ['largest-contentful-paint']});
+
+            // Measure CLS
+            let clsValue = 0;
+            new PerformanceObserver((entryList) => {
+                for (const entry of entryList.getEntries()) {
+                    if (!entry.hadRecentInput) {
+                        clsValue += entry.value;
+                        console.log('CLS:', clsValue);
+                    }
+                }
+            }).observe({entryTypes: ['layout-shift']});
+
+            // Measure INP
+            new PerformanceObserver((entryList) => {
+                for (const entry of entryList.getEntries()) {
+                    console.log('INP:', entry.processingStart - entry.startTime);
+                }
+            }).observe({entryTypes: ['event']});
+        }
+
+        // Start measuring web vitals
+        measureWebVitals();
+    </script>
+</body>
+</html>

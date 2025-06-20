@@ -1,0 +1,33 @@
+# Learn more about configuring your theme app extension at https://shopify.dev/docs/apps/app-extensions/theme-app-extensions
+
+api_version = "2024-01"
+
+[[extensions]]
+type = "theme"
+name = "Facebook Pixel & Conversion Tracking"
+
+[extensions.settings]
+[[extensions.settings.blocks]]
+type = "facebook_pixel"
+name = "Facebook Pixel"
+target = "head"
+
+[[extensions.settings.blocks.settings]]
+type = "text"
+id = "pixel_id"
+label = "Facebook Pixel ID"
+info = "Enter your Facebook Pixel ID for conversion tracking"
+
+[[extensions.settings.blocks.settings]]
+type = "checkbox"
+id = "enable_advanced_matching"
+label = "Enable Advanced Matching"
+default = true
+info = "Improve conversion tracking accuracy with customer data"
+
+[[extensions.settings.blocks.settings]]
+type = "checkbox"
+id = "enable_automatic_events"
+label = "Enable Automatic Events"
+default = true
+info = "Automatically track page views, add to cart, and purchase events"

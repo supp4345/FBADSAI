@@ -1,0 +1,39 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "AI Facebook Ads Pro"
+client_id = "{{ SHOPIFY_API_KEY }}"
+application_url = "{{ HOST }}/app"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products,read_products,write_orders,read_orders,read_customers,read_customer_events,write_script_tags,read_script_tags"
+
+[auth]
+redirect_urls = [
+  "{{ HOST }}/auth/shopify/callback",
+  "{{ HOST }}/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-01"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "{{ SHOPIFY_DEV_STORE_URL }}"
+include_config_on_deploy = true
+
+[[build.include]]
+path = "/*"
+
+[[build.exclude]]
+path = "node_modules/*"
+
+[[build.exclude]]
+path = ".git/*"
+
+[[build.exclude]]
+path = "*.log"

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | AI Facebook Ads Pro</title>
+    
+    <!-- Shopify Polaris CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@shopify/polaris@12.0.0/build/esm/styles.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/app.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Meta tags for Shopify iframe -->
+    <meta name="shopify-api-key" content="<%= process.env.SHOPIFY_API_KEY %>">
+    <meta name="shopify-shop-domain" content="<%= shop %>">
+    
+    <style>
+        :root {
+            --p-color-bg: #f6f6f7;
+            --p-color-bg-surface: #ffffff;
+            --p-color-border: #e1e3e5;
+            --p-color-text: #202223;
+            --p-color-text-secondary: #6d7175;
+            --p-color-primary: #008060;
+            --p-color-primary-hover: #006b4f;
+            --p-color-critical: #d72c0d;
+            --p-color-warning: #ffc453;
+            --p-color-success: #008060;
+            --p-space-1: 4px;
+            --p-space-2: 8px;
+            --p-space-3: 12px;
+            --p-space-4: 16px;
+            --p-space-5: 20px;
+            --p-space-6: 24px;
+            --p-border-radius-1: 4px;
+            --p-border-radius-2: 8px;
+            --p-shadow-card: 0 1px 0 rgba(22, 29, 37, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--p-color-bg);
+            color: var(--p-color-text);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--p-color-bg-surface);
+            border-right: 1px solid var(--p-color-border);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: var(--p-space-4);
+            border-bottom: 1px solid var(--p-color-border);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--p-space-2);
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--p-color-primary);
+        }
+
+        .sidebar-nav {
+            padding: var(--p-space-3) 0;
+        }
+
+        .nav-section {
+            margin-bottom: var(--p-space-4);
+        }
+
+        .nav-section-title {
+            padding: var(--p-space-2) var(--p-space-4);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--p-color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: var(--p-space-3) var(--p-space-4);
+            color: var(--p-color-text);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--p-color-bg);
+            color: var(--p-color-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--p-color-bg);
+            color: var(--p-color-primary);
+            border-left-color: var(--p-color-primary);
+            font-weight: 500;
+        }
+
+        .nav-item i {
+            width: 20px;
+            margin-right: var(--p-space-3);
+            font-size: 16px;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            background: var(--p-color-bg-surface);
+            border-bottom: 1px solid var(--p-color-border);
+            padding: var(--p-space-4) var(--p-space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--p-color-text);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--p-space-3);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--p-space-2) var(--p-space-4);
+            border: 1px solid var(--p-color-border);
+            border-radius: var(--p-border-radius-1);
+            background: var(--p-color-bg-surface);
+            color: var(--p-color-text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: var(--p-space-2);
+        }
+
+        .btn:hover {
+            background: var(--p-color-bg);
+            border-color: var(--p-color-text-secondary);
+        }
+
+        .btn-primary {
+            background: var(--p-color-primary);
+            border-color: var(--p-color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--p-color-primary-hover);
+            border-color: var(--p-color-primary-hover);
+        }
+
+        .btn-critical {
+            background: var(--p-color-critical);
+            border-color: var(--p-color-critical);
+            color: white;
+        }
+
+        .content-area {
+            padding: var(--p-space-6);
+        }
+
+        .card {
+            background: var(--p-color-bg-surface);
+            border: 1px solid var(--p-color-border);
+            border-radius: var(--p-border-radius-2);
+            box-shadow: var(--p-shadow-card);
+            margin-bottom: var(--p-space-4);
+        }
+
+        .card-header {
+            padding: var(--p-space-4) var(--p-space-5);
+            border-bottom: 1px solid var(--p-color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--p-color-text);
+        }
+
+        .card-body {
+            padding: var(--p-space-5);
+        }
+
+        .grid {
+            display: grid;
+            gap: var(--p-space-4);
+        }
+
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: var(--p-space-4);
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--p-color-text);
+            margin-bottom: var(--p-space-1);
+        }
+
+        .metric-label {
+            font-size: 14px;
+            color: var(--p-color-text-secondary);
+            margin-bottom: var(--p-space-2);
+        }
+
+        .metric-change {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+
+        .metric-change.positive {
+            background: #e8f5e8;
+            color: var(--p-color-success);
+        }
+
+        .metric-change.negative {
+            background: #ffeaea;
+            color: var(--p-color-critical);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--p-space-6);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--p-color-border);
+            border-top: 2px solid var(--p-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: var(--p-space-3) var(--p-space-4);
+            border-radius: var(--p-border-radius-1);
+            margin-bottom: var(--p-space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--p-space-2);
+        }
+
+        .alert-success {
+            background: #e8f5e8;
+            border: 1px solid #c6e6c6;
+            color: var(--p-color-success);
+        }
+
+        .alert-warning {
+            background: #fff8e1;
+            border: 1px solid #ffc453;
+            color: #b7791f;
+        }
+
+        .alert-error {
+            background: #ffeaea;
+            border: 1px solid #ffb3b3;
+            color: var(--p-color-critical);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #e8f5e8;
+            color: var(--p-color-success);
+        }
+
+        .badge-warning {
+            background: #fff8e1;
+            color: #b7791f;
+        }
+
+        .badge-error {
+            background: #ffeaea;
+            color: var(--p-color-critical);
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-robot"></i>
+                    AI Ads Pro
+                </div>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Dashboard</div>
+                    <a href="/dashboard" class="nav-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+                        <i class="fas fa-chart-line"></i>
+                        Overview
+                    </a>
+                    <a href="/dashboard/campaigns" class="nav-item <%= currentPage === 'campaigns' ? 'active' : '' %>">
+                        <i class="fas fa-bullhorn"></i>
+                        Campaigns
+                    </a>
+                    <a href="/dashboard/analytics" class="nav-item <%= currentPage === 'analytics' ? 'active' : '' %>">
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">AI Tools</div>
+                    <a href="#" class="nav-item" onclick="openAIGenerator()">
+                        <i class="fas fa-magic"></i>
+                        AI Generator
+                    </a>
+                    <a href="#" class="nav-item" onclick="openOptimizer()">
+                        <i class="fas fa-cogs"></i>
+                        Optimizer
+                    </a>
+                    <a href="#" class="nav-item" onclick="openAudienceBuilder()">
+                        <i class="fas fa-users"></i>
+                        Audience Builder
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Account</div>
+                    <a href="/dashboard/settings" class="nav-item <%= currentPage === 'settings' ? 'active' : '' %>">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                    <a href="#" class="nav-item" onclick="showHelp()">
+                        <i class="fas fa-question-circle"></i>
+                        Help
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div>
+                    <h1 class="page-title"><%= title %></h1>
+                </div>
+                <div class="top-bar-actions">
+                    <% if (user && !user.facebookAccessToken) { %>
+                        <a href="/auth/facebook" class="btn btn-primary">
+                            <i class="fab fa-facebook"></i>
+                            Connect Facebook
+                        </a>
+                    <% } %>
+                    <button class="btn" onclick="showNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-count" class="badge badge-error" style="display: none;">0</span>
+                    </button>
+                    <div class="user-menu">
+                        <button class="btn" onclick="toggleUserMenu()">
+                            <i class="fas fa-user"></i>
+                            <%= shop %>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <%- body %>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals and overlays will be inserted here -->
+    <div id="modal-container"></div>
+    <div id="notification-container"></div>
+
+    <!-- JavaScript -->
+    <script src="/js/app.js"></script>
+    <script>
+        // Initialize app
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Load notifications
+            loadNotifications();
+            
+            // Setup real-time updates
+            setupRealTimeUpdates();
+            
+            // Initialize tooltips and other UI components
+            initializeUI();
+        }
+
+        function loadNotifications() {
+            // Implementation for loading notifications
+        }
+
+        function setupRealTimeUpdates() {
+            // Implementation for real-time updates
+        }
+
+        function initializeUI() {
+            // Initialize any UI components
+        }
+
+        function openAIGenerator() {
+            // Implementation for AI generator modal
+            showModal('ai-generator');
+        }
+
+        function openOptimizer() {
+            // Implementation for optimizer modal
+            showModal('optimizer');
+        }
+
+        function openAudienceBuilder() {
+            // Implementation for audience builder modal
+            showModal('audience-builder');
+        }
+
+        function showHelp() {
+            // Implementation for help modal
+            showModal('help');
+        }
+
+        function showNotifications() {
+            // Implementation for notifications panel
+            togglePanel('notifications');
+        }
+
+        function toggleUserMenu() {
+            // Implementation for user menu
+            togglePanel('user-menu');
+        }
+
+        function showModal(modalId) {
+            // Generic modal implementation
+            console.log('Opening modal:', modalId);
+        }
+
+        function togglePanel(panelId) {
+            // Generic panel toggle implementation
+            console.log('Toggling panel:', panelId);
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // Add mobile menu button for small screens
+        if (window.innerWidth <= 768) {
+            const topBar = document.querySelector('.top-bar');
+            const mobileMenuBtn = document.createElement('button');
+            mobileMenuBtn.className = 'btn';
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            mobileMenuBtn.onclick = toggleSidebar;
+            topBar.insertBefore(mobileMenuBtn, topBar.firstChild);
+        }
+    </script>
+</body>
+</html>

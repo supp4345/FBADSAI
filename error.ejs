@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .error-message {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+        
+        .shop-info {
+            margin: 1rem 0;
+            opacity: 0.9;
+        }
+        
+        .actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: white;
+            color: #dc2626;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .troubleshoot {
+            margin-top: 2rem;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        
+        .troubleshoot h3 {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .troubleshoot ol {
+            padding-left: 1.5rem;
+        }
+        
+        .troubleshoot li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon">⚠️</div>
+        <h1>Installation Error</h1>
+        
+        <% if (shop) { %>
+            <div class="shop-info">
+                <strong>Shop:</strong> <%= shop %>
+            </div>
+        <% } %>
+        
+        <div class="error-message">
+            <%= error %>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn">
+                🏠 Back to Home
+            </a>
+            <a href="/auth/shopify?shop=<%= shop || 'your-shop' %>" class="btn btn-secondary">
+                🔄 Try Again
+            </a>
+        </div>
+        
+        <div class="troubleshoot">
+            <h3>🔧 Troubleshooting Steps</h3>
+            <ol>
+                <li><strong>Check App Configuration:</strong> Ensure your Shopify app settings are correct in the Partner Dashboard</li>
+                <li><strong>Verify URLs:</strong> Make sure the App URL and Redirect URLs match your deployed app</li>
+                <li><strong>API Credentials:</strong> Confirm your API key and secret are properly set in environment variables</li>
+                <li><strong>Development Store:</strong> If testing, make sure you're using a development store</li>
+                <li><strong>Browser Issues:</strong> Try clearing browser cache or using an incognito window</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
