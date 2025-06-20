@@ -2,7 +2,7 @@
 
 name = "AI Facebook Ads Pro"
 client_id = "{{ SHOPIFY_API_KEY }}"
-application_url = "{{ HOST }}/app"
+application_url = "{{ HOST }}"
 embedded = true
 
 [access_scopes]

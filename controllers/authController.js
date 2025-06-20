@@ -118,8 +118,11 @@ class AuthController {
       ctx.session.authenticated = true;
       ctx.session.sessionId = session.id;
 
-      // Redirect to embedded app
-      const redirectUrl = `${HOST}/app?shop=${session.shop}&host=${Buffer.from(`${session.shop}/admin`).toString('base64')}`;
+      // Redirect to embedded app with proper host parameter
+      const hostParam = ctx.query.host || Buffer.from(`${session.shop}/admin`).toString('base64');
+      const redirectUrl = `${HOST}/app?shop=${session.shop}&host=${hostParam}&embedded=1`;
+      
+      console.log(`Redirecting to embedded app: ${redirectUrl}`);
       ctx.redirect(redirectUrl);
     } catch (error) {
       console.error('Shopify auth callback error:', error);

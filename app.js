@@ -175,18 +175,55 @@ app.use(async (ctx, next) => {
 
 // Routes
 
-// Root route - redirect to Shopify authentication
+// Root route - handle Shopify app installation
 router.get('/', async (ctx) => {
   const shop = ctx.query.shop;
+  const host = ctx.query.host;
+  const embedded = ctx.query.embedded;
   
-  // If shop parameter is present, redirect to install
+  // If shop parameter is present, this is a Shopify installation request
   if (shop) {
-    ctx.redirect(`/auth/shopify?shop=${encodeURIComponent(shop)}`);
+    console.log(`Installation request from shop: ${shop}`);
+    
+    // Validate shop domain
+    const cleanShop = shop.toLowerCase().trim();
+    if (!cleanShop.includes('.myshopify.com') || !/^[a-zA-Z0-9\-]+\.myshopify\.com$/.test(cleanShop)) {
+      await ctx.render('install', { 
+        title: 'Install AI Facebook Ads Pro',
+        error: 'Invalid shop domain. Please enter a valid Shopify store URL.',
+        shop: shop
+      });
+      return;
+    }
+    
+    // Redirect to Shopify OAuth
+    ctx.redirect(`/auth/shopify?shop=${encodeURIComponent(cleanShop)}&host=${encodeURIComponent(host || '')}&embedded=${embedded || '1'}`);
     return;
   }
   
-  // No shop parameter - this means direct access, redirect to Shopify app installation
-  ctx.redirect('https://apps.shopify.com/your-app-handle');
+  // No shop parameter - show installation page
+  await ctx.render('install', { 
+    title: 'Install AI Facebook Ads Pro',
+    shop: ''
+  });
+});
+
+// Installation route for Partner Dashboard
+router.get('/install', async (ctx) => {
+  const shop = ctx.query.shop;
+  const host = ctx.query.host;
+  
+  if (shop) {
+    // Redirect to main installation flow
+    ctx.redirect(`/?shop=${encodeURIComponent(shop)}&host=${encodeURIComponent(host || '')}`);
+    return;
+  }
+  
+  // Show installation page
+  await ctx.render('install', { 
+    title: 'Install AI Facebook Ads Pro',
+    shop: ''
+  });
 });
 
 // Main embedded app route
@@ -196,7 +233,7 @@ router.get('/app', async (ctx) => {
   
   if (!shop) {
     ctx.status = 400;
-    ctx.body = { error: 'Shop parameter is required. Please install the app from Shopify App Store.' };
+    ctx.body = { error: 'Shop parameter is required. Please install the app first.' };
     return;
   }
   

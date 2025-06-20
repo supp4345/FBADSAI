@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install AI Facebook Ads Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        
+        .install-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .features {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .install-form {
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .install-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        .install-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .install-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .help-text {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #fcc;
+        }
+    </style>
+</head>
+<body>
+    <div class="install-container">
+        <div class="logo">AI</div>
+        <h1>AI Facebook Ads Pro</h1>
+        <p class="subtitle">Automate and optimize your Facebook advertising with AI</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>AI-powered campaign optimization</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>Automatic product sync to Facebook</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>Real-time performance analytics</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div>Smart budget recommendations</div>
+            </div>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        
+        <form class="install-form" action="/" method="GET">
+            <div class="form-group">
+                <label for="shop">Your Shopify Store URL</label>
+                <input 
+                    type="text" 
+                    id="shop" 
+                    name="shop" 
+                    placeholder="your-store.myshopify.com"
+                    value="<%= typeof shop !== 'undefined' ? shop : '' %>"
+                    required
+                >
+            </div>
+            
+            <button type="submit" class="install-btn">
+                Install App on Store
+            </button>
+        </form>
+        
+        <p class="help-text">
+            Enter your Shopify store URL to install AI Facebook Ads Pro. 
+            You'll be redirected to Shopify to authorize the installation.
+        </p>
+    </div>
+    
+    <script>
+        // Auto-format shop URL
+        document.getElementById('shop').addEventListener('input', function(e) {
+            let value = e.target.value.toLowerCase().trim();
+            
+            // Remove protocol if present
+            value = value.replace(/^https?:\/\//, '');
+            
+            // Add .myshopify.com if not present
+            if (value && !value.includes('.myshopify.com')) {
+                if (value.includes('.')) {
+                    // Replace existing domain
+                    value = value.split('.')[0] + '.myshopify.com';
+                } else {
+                    // Add domain
+                    value = value + '.myshopify.com';
+                }
+            }
+            
+            e.target.value = value;
+        });
+        
+        // Form validation
+        document.querySelector('.install-form').addEventListener('submit', function(e) {
+            const shopInput = document.getElementById('shop');
+            const shop = shopInput.value.trim();
+            
+            if (!shop) {
+                e.preventDefault();
+                alert('Please enter your Shopify store URL');
+                return;
+            }
+            
+            if (!shop.includes('.myshopify.com')) {
+                e.preventDefault();
+                alert('Please enter a valid Shopify store URL (e.g., your-store.myshopify.com)');
+                return;
+            }
+            
+            // Disable button to prevent double submission
+            const btn = document.querySelector('.install-btn');
+            btn.disabled = true;
+            btn.textContent = 'Installing...';
+        });
+    </script>
+</body>
+</html>

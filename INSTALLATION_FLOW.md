@@ -1,29 +1,31 @@
-# 📱 Shopify App Installation Flow
+# 🚀 AI Facebook Ads Pro - Installation Flow
 
-## ✅ Updated Installation Process (No Landing Page)
+## ✅ Partner Dashboard Installation Process
 
-The app has been updated to remove the landing page and open directly in the Shopify dashboard when installed.
+The app is configured for direct installation from Shopify Partner Dashboard, bypassing the App Store requirement.
 
 ### Installation Flow:
 
-1. **User clicks "Install" from Shopify App Store**
-   - App Store redirects to: `https://your-app.com/app?shop=store.myshopify.com`
+1. **Developer clicks "Test on development store" from Partner Dashboard**
+   - Partner Dashboard redirects to: `https://your-app.com/?shop=store.myshopify.com`
 
-2. **App checks for existing user**
-   - If user exists: Shows embedded dashboard immediately
-   - If user doesn't exist: Redirects to OAuth flow
+2. **Root route handles installation request**
+   - Validates shop domain format
+   - Shows installation page if no shop parameter
+   - Redirects to OAuth if shop parameter is valid
 
-3. **OAuth Authentication (if needed)**
+3. **OAuth Authentication**
    - Redirects to: `/auth/shopify?shop=store.myshopify.com`
-   - Shopify handles permission grants
+   - Shopify handles permission grants for required scopes
    - Callback to: `/auth/shopify/callback`
 
-4. **User Creation & Redirect**
-   - Creates user record in database
+4. **User Creation & Setup**
+   - Creates user record in database with shop information
+   - Stores encrypted access tokens
    - Sets up webhooks automatically
-   - Redirects to: `/app?shop=store.myshopify.com&host=...`
+   - Redirects to: `/app?shop=store.myshopify.com&host=...&embedded=1`
 
-5. **Embedded Dashboard**
+5. **Embedded Dashboard Launch**
    - App loads directly in Shopify admin iframe
    - Shows onboarding flow for new users
    - Guides through Facebook connection and product sync
